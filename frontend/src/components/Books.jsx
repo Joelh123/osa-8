@@ -1,12 +1,17 @@
 import { ALL_BOOKS } from "../queries";
 import { useQuery } from "@apollo/client/react";
+import { useState } from "react";
 
 const Books = () => {
+	const [books, setBooks] = useState([]);
+
 	const result = useQuery(ALL_BOOKS);
 
-	if (result.loading) return <div>loading...</div>;
-
-	const books = result.data.allBooks;
+	if (result.loading) {
+		return <div>loading...</div>;
+	} else if (books.length === 0) {
+		setBooks(result.data.allBooks);
+	}
 
 	return (
 		<div>
