@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 const Author = require("./models/author");
 const Book = require("./models/book");
+const { GraphQLError } = require("graphql");
 require("dotenv").config();
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -86,7 +87,15 @@ const resolvers = {
 
 			if (!existingAuthor) {
 				const newAuthor = new Author({ name: args.author });
-				await newAuthor.save();
+				try {
+					await newAuthor.save();
+				} catch (error) {
+					throw new GraphQLError("Saving author failed", {
+						extensions: {
+							error,
+						},
+					});
+				}
 				authorId = newAuthor._id;
 			} else {
 				authorId = existingAuthor._id;
@@ -96,11 +105,31 @@ const resolvers = {
 				...args,
 				author: authorId,
 			});
-			const savedBook = await book.save();
-			return Book.findById(savedBook._id).populate("author");
+			try {
+				await book.save();
+			} catch (error) {
+				throw new GraphQLError("Saving book failed", {
+					extensions: {
+						code: "BAD_USER_INPUT",
+						invalidArgs: args.title,
+						error,
+					},
+				});
+			}
+			return Book.findById(book._id).populate("author");
 		},
 		editAuthor: async (root, args) => {
-			await Author.updateOne({ name: args.name }, { born: args.setBornTo });
+			try {
+				await Author.updateOne({ name: args.name }, { born: args.setBornTo });
+			} catch (error) {
+				throw new GraphQLError("Editing author failed", {
+					extensions: {
+						code: "BAD_USER_INPUT",
+						invalidArgs: args.name,
+						error,
+					},
+				});
+			}
 			const updatedAuthor = await Author.findOne({ name: args.name });
 			return updatedAuthor;
 		},
