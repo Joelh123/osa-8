@@ -209,7 +209,14 @@ const resolvers = {
 	Author: {
 		bookCount: async (root) => {
 			const books = await Book.find({});
-			return books.filter((b) => (b.author !== root.name ? null : b)).length;
+			return books.filter((b) => (b.author._id.toString() !== root.id ? null : b))
+				.length;
+		},
+	},
+	Book: {
+		author: async (root) => {
+			const author = await Author.findOne({ _id: root.author._id.toString() });
+			return author;
 		},
 	},
 };

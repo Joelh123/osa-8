@@ -1,11 +1,23 @@
 import { ALL_BOOKS } from "../queries";
 import { useQuery } from "@apollo/client/react";
+import { useEffect } from "react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Books = () => {
+const Books = ({ token }) => {
 	const [books, setBooks] = useState([]);
 
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		if (!token) {
+			navigate("/");
+		}
+	}, [token, navigate]);
+
 	const result = useQuery(ALL_BOOKS);
+
+	console.log(result);
 
 	if (result.loading) {
 		return <div>loading...</div>;
@@ -27,7 +39,7 @@ const Books = () => {
 					{books.map((a) => (
 						<tr key={a.title}>
 							<td>{a.title}</td>
-							<td>{a.author}</td>
+							<td>{a.author.name}</td>
 							<td>{a.published}</td>
 						</tr>
 					))}

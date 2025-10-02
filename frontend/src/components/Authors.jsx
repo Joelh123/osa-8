@@ -1,11 +1,21 @@
 import { useState } from "react";
 import { ALL_AUTHORS, EDIT_AUTHOR } from "../queries";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-const Authors = () => {
+const Authors = ({ token }) => {
 	const [authors, setAuthors] = useState([]);
 	const [name, setName] = useState("");
 	const [born, setBorn] = useState("");
+
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		if (!token) {
+			navigate("/");
+		}
+	}, [token, navigate]);
 
 	const result = useQuery(ALL_AUTHORS);
 
