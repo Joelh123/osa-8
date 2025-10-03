@@ -4,9 +4,11 @@ import NewBook from "./components/NewBook";
 import Login from "./components/Login";
 import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useApolloClient } from "@apollo/client/react";
+import { useApolloClient, useQuery } from "@apollo/client/react";
+import Recommendations from "./components/Recommendations";
 
 const App = () => {
+	const [favoriteGenre, setFavoriteGenre] = useState(null);
 	const [token, setToken] = useState(() =>
 		localStorage.getItem("bookapp-user-token")
 	);
@@ -16,6 +18,7 @@ const App = () => {
 
 	const logOut = () => {
 		setToken(null);
+		setFavoriteGenre(null);
 		localStorage.clear();
 		client.resetStore();
 	};
@@ -41,6 +44,9 @@ const App = () => {
 				<Link style={show} to="/add">
 					add book
 				</Link>
+				<Link style={show} to="/recommendations">
+					recommend
+				</Link>
 				{token ? (
 					<button onClick={() => logOut()}>Log out</button>
 				) : (
@@ -52,6 +58,16 @@ const App = () => {
 				<Route path="/authors" element={<Authors token={token} />} />
 				<Route path="/books" element={<Books token={token} />} />
 				<Route path="/add" element={<NewBook token={token} />} />
+				<Route
+					path="/recommendations"
+					element={
+						<Recommendations
+							token={token}
+							favoriteGenre={favoriteGenre}
+							setFavoriteGenre={setFavoriteGenre}
+						/>
+					}
+				/>
 				<Route path="/" element={<Login token={token} setToken={setToken} />} />
 			</Routes>
 		</div>
