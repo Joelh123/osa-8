@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ALL_BOOKS, CREATE_BOOK } from "../queries";
+import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from "../queries";
 import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
@@ -20,13 +20,29 @@ const NewBook = ({ token }) => {
 	}, [token, navigate]);
 
 	const [createBook] = useMutation(CREATE_BOOK, {
-		refetchQueries: [{ query: ALL_BOOKS }],
+		onError: (error) => {
+			console.log(error.graphQLErrors.map((e) => e.message).join("\n"));
+		},
+		update: (cache, response) => {
+			cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+				return {
+					allBooks: allBooks.concat(response.data.addBook),
+				};
+			});
+		},
 	});
 
 	const submit = async (event) => {
 		event.preventDefault();
 
-		createBook({ variables: { title, author, published, genres } });
+		createBook({
+			variables: {
+				title,
+				author,
+				published,
+				genres: genres.length > 0 ? genres : undefined,
+			},
+		});
 
 		setTitle("");
 		setPublished("");

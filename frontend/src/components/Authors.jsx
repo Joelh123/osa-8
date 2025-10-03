@@ -1,21 +1,11 @@
 import { useState } from "react";
 import { ALL_AUTHORS, EDIT_AUTHOR } from "../queries";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 const Authors = ({ token }) => {
 	const [authors, setAuthors] = useState([]);
 	const [name, setName] = useState("");
 	const [born, setBorn] = useState("");
-
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		if (!token) {
-			navigate("/");
-		}
-	}, [token, navigate]);
 
 	const result = useQuery(ALL_AUTHORS);
 
@@ -40,6 +30,10 @@ const Authors = ({ token }) => {
 		setAuthors(result.data.allAuthors);
 	}
 
+	const show = {
+		display: token ? "" : "none",
+	};
+
 	return (
 		<div>
 			<h2>authors</h2>
@@ -59,26 +53,28 @@ const Authors = ({ token }) => {
 					))}
 				</tbody>
 			</table>
-			<h3>Set birthyear</h3>
-			<form onSubmit={handleSubmit}>
-				<div>
-					name
-					<select value={name} onChange={({ target }) => setName(target.value)}>
-						<option></option>
-						{authors.map((a) => (
-							<option key={a.name}>{a.name}</option>
-						))}
-					</select>
-				</div>
-				<div>
-					born
-					<input
-						value={born}
-						onChange={({ target }) => setBorn(parseInt(target.value))}
-					/>
-				</div>
-				<button type="submit">update author</button>
-			</form>
+			<div style={show}>
+				<h3>Set birthyear</h3>
+				<form onSubmit={handleSubmit}>
+					<div>
+						name
+						<select value={name} onChange={({ target }) => setName(target.value)}>
+							<option></option>
+							{authors.map((a) => (
+								<option key={a.name}>{a.name}</option>
+							))}
+						</select>
+					</div>
+					<div>
+						born
+						<input
+							value={born}
+							onChange={({ target }) => setBorn(parseInt(target.value))}
+						/>
+					</div>
+					<button type="submit">update author</button>
+				</form>
+			</div>
 		</div>
 	);
 };

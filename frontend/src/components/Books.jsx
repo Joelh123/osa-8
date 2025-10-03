@@ -1,23 +1,11 @@
 import { ALL_BOOKS } from "../queries";
 import { useQuery } from "@apollo/client/react";
-import { useEffect } from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
-const Books = ({ token }) => {
+const Books = () => {
 	const [books, setBooks] = useState([]);
 
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		if (!token) {
-			navigate("/");
-		}
-	}, [token, navigate]);
-
 	const result = useQuery(ALL_BOOKS);
-
-	console.log(result);
 
 	if (result.loading) {
 		return <div>loading...</div>;

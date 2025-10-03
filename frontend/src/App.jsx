@@ -2,9 +2,8 @@ import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 import Login from "./components/Login";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useEffect } from "react";
 import { useApolloClient } from "@apollo/client/react";
 
 const App = () => {
@@ -12,6 +11,8 @@ const App = () => {
 		localStorage.getItem("bookapp-user-token")
 	);
 	const client = useApolloClient();
+
+	const navigate = useNavigate();
 
 	const logOut = () => {
 		setToken(null);
@@ -24,22 +25,27 @@ const App = () => {
 	};
 
 	const show = {
-		display: token ? "block" : "none",
+		display: token ? "" : "none",
+		paddingRight: 5,
 	};
 
 	return (
 		<div>
-			<div style={show}>
+			<div>
 				<Link style={padding} to="/authors">
 					authors
 				</Link>
 				<Link style={padding} to="/books">
 					books
 				</Link>
-				<Link style={padding} to="/add">
+				<Link style={show} to="/add">
 					add book
 				</Link>
-				<button onClick={() => logOut()}>Log out</button>
+				{token ? (
+					<button onClick={() => logOut()}>Log out</button>
+				) : (
+					<button onClick={() => navigate("/")}>Log in</button>
+				)}
 			</div>
 
 			<Routes>
