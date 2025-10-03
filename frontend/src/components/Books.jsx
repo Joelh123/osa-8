@@ -4,8 +4,14 @@ import { useState } from "react";
 
 const Books = () => {
 	const [books, setBooks] = useState([]);
+	const [genres, setGenres] = useState([]);
+	const [genre, setGenre] = useState(null);
 
-	const result = useQuery(ALL_BOOKS);
+	const result = useQuery(ALL_BOOKS, {
+		variables: {
+			genre,
+		},
+	});
 
 	if (result.loading) {
 		return <div>loading...</div>;
@@ -13,26 +19,67 @@ const Books = () => {
 		setBooks(result.data.allBooks);
 	}
 
+	const rowStyle = {
+		paddingRight: 10,
+	};
+
+	const selectStyle = {
+		paddingTop: 30,
+		fontSize: 20,
+	};
+
 	return (
 		<div>
 			<h2>books</h2>
-
+			{genre ? (
+				<p>
+					in genre <b>{genre}</b>
+				</p>
+			) : null}
 			<table>
 				<tbody>
 					<tr>
-						<th></th>
-						<th>author</th>
-						<th>published</th>
+						<th style={rowStyle}></th>
+						<th style={rowStyle}>author</th>
+						<th style={rowStyle}>published</th>
 					</tr>
-					{books.map((a) => (
-						<tr key={a.title}>
-							<td>{a.title}</td>
-							<td>{a.author.name}</td>
-							<td>{a.published}</td>
-						</tr>
-					))}
+					{books.map((b) => {
+						if (b.genres) {
+							b.genres.map((g) =>
+								genres.includes(g) ? g : setGenres(genres.concat(g))
+							);
+						}
+						if (genre && b.genres.includes(genre)) {
+							return (
+								<tr key={b.title}>
+									<td style={rowStyle}>{b.title}</td>
+									<td style={rowStyle}>{b.author.name}</td>
+									<td style={rowStyle}>{b.published}</td>
+								</tr>
+							);
+						} else if (!genre) {
+							return (
+								<tr key={b.title}>
+									<td style={rowStyle}>{b.title}</td>
+									<td style={rowStyle}>{b.author.name}</td>
+									<td style={rowStyle}>{b.published}</td>
+								</tr>
+							);
+						}
+					})}
 				</tbody>
 			</table>
+			<div style={selectStyle}>
+				select genre:
+				<select onChange={({ target }) => setGenre(target.value)}>
+					<option value={null}></option>
+					{genres.map((g) => (
+						<option key={g} value={g}>
+							{g}
+						</option>
+					))}
+				</select>
+			</div>
 		</div>
 	);
 };
