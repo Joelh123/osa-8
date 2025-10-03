@@ -17,7 +17,6 @@ const App = () => {
 
 	const logOut = () => {
 		setToken(null);
-		setFavoriteGenre(null);
 		localStorage.clear();
 		client.resetStore();
 	};
