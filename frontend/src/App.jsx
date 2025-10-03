@@ -8,7 +8,6 @@ import { useApolloClient, useQuery } from "@apollo/client/react";
 import Recommendations from "./components/Recommendations";
 
 const App = () => {
-	const [favoriteGenre, setFavoriteGenre] = useState(null);
 	const [token, setToken] = useState(() =>
 		localStorage.getItem("bookapp-user-token")
 	);
@@ -60,13 +59,7 @@ const App = () => {
 				<Route path="/add" element={<NewBook token={token} />} />
 				<Route
 					path="/recommendations"
-					element={
-						<Recommendations
-							token={token}
-							favoriteGenre={favoriteGenre}
-							setFavoriteGenre={setFavoriteGenre}
-						/>
-					}
+					element={<Recommendations token={token} />}
 				/>
 				<Route path="/" element={<Login token={token} setToken={setToken} />} />
 			</Routes>

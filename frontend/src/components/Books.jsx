@@ -3,20 +3,19 @@ import { useQuery } from "@apollo/client/react";
 import { useState } from "react";
 
 const Books = () => {
-	const [books, setBooks] = useState([]);
 	const [genres, setGenres] = useState([]);
 	const [genre, setGenre] = useState(null);
 
 	const result = useQuery(ALL_BOOKS, {
 		variables: {
-			genre,
+			genre: genre,
 		},
 	});
 
+	const books = result.data?.allBooks || [];
+
 	if (result.loading) {
 		return <div>loading...</div>;
-	} else if (books.length === 0) {
-		setBooks(result.data.allBooks);
 	}
 
 	const rowStyle = {
@@ -49,29 +48,23 @@ const Books = () => {
 								genres.includes(g) ? g : setGenres(genres.concat(g))
 							);
 						}
-						if (genre && b.genres.includes(genre)) {
-							return (
-								<tr key={b.title}>
-									<td style={rowStyle}>{b.title}</td>
-									<td style={rowStyle}>{b.author.name}</td>
-									<td style={rowStyle}>{b.published}</td>
-								</tr>
-							);
-						} else if (!genre) {
-							return (
-								<tr key={b.title}>
-									<td style={rowStyle}>{b.title}</td>
-									<td style={rowStyle}>{b.author.name}</td>
-									<td style={rowStyle}>{b.published}</td>
-								</tr>
-							);
-						}
+
+						return (
+							<tr key={b.title}>
+								<td style={rowStyle}>{b.title}</td>
+								<td style={rowStyle}>{b.author.name}</td>
+								<td style={rowStyle}>{b.published}</td>
+							</tr>
+						);
 					})}
 				</tbody>
 			</table>
 			<div style={selectStyle}>
 				select genre:
-				<select onChange={({ target }) => setGenre(target.value)}>
+				<select
+					onChange={({ target }) => setGenre(target.value)}
+					defaultValue={genre}
+				>
 					<option value={null}></option>
 					{genres.map((g) => (
 						<option key={g} value={g}>

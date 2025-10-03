@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { ME } from "../queries";
 import { useNavigate } from "react-router-dom";
 
-const Recommendations = ({ token, favoriteGenre, setFavoriteGenre }) => {
-	const [books, setBooks] = useState([]);
-
+const Recommendations = ({ token }) => {
+	const [favoriteGenre, setFavoriteGenre] = useState(null);
 	const currentUser = useQuery(ME);
-
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -18,18 +16,19 @@ const Recommendations = ({ token, favoriteGenre, setFavoriteGenre }) => {
 		if (!currentUser.loading) {
 			setFavoriteGenre(currentUser.data.me.favoriteGenre);
 		}
-	}, [currentUser, token, navigate]);
+	}, [currentUser.loading, token, navigate]);
 
 	const result = useQuery(ALL_BOOKS, {
 		variables: {
-			favoriteGenre,
+			genre: favoriteGenre,
 		},
+		skip: !favoriteGenre,
 	});
 
-	if (result.loading) {
+	const books = result.data?.allBooks || [];
+
+	if (result.loading || currentUser.loading) {
 		return <div>loading...</div>;
-	} else if (books.length === 0) {
-		setBooks(result.data.allBooks);
 	}
 
 	const rowStyle = {
@@ -50,15 +49,13 @@ const Recommendations = ({ token, favoriteGenre, setFavoriteGenre }) => {
 						<th style={rowStyle}>published</th>
 					</tr>
 					{books.map((b) => {
-						if (b.genres.includes(favoriteGenre)) {
-							return (
-								<tr key={b.title}>
-									<td style={rowStyle}>{b.title}</td>
-									<td style={rowStyle}>{b.author.name}</td>
-									<td style={rowStyle}>{b.published}</td>
-								</tr>
-							);
-						}
+						return (
+							<tr key={b.title}>
+								<td style={rowStyle}>{b.title}</td>
+								<td style={rowStyle}>{b.author.name}</td>
+								<td style={rowStyle}>{b.published}</td>
+							</tr>
+						);
 					})}
 				</tbody>
 			</table>
