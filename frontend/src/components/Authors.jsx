@@ -3,7 +3,6 @@ import { ALL_AUTHORS, EDIT_AUTHOR } from "../queries";
 import { useQuery, useMutation } from "@apollo/client/react";
 
 const Authors = ({ token }) => {
-	const [authors, setAuthors] = useState([]);
 	const [name, setName] = useState("");
 	const [born, setBorn] = useState("");
 
@@ -16,18 +15,14 @@ const Authors = ({ token }) => {
 
 		editAuthor({ variables: { name, setBornTo: born } });
 
-		let copy = JSON.parse(JSON.stringify(authors));
-		copy.map((a) => (a.name === name ? (a.born = born) : a));
-		setAuthors(copy);
-
 		setBorn("");
 		setName("");
 	};
 
+	const authors = result.data?.allAuthors || [];
+
 	if (result.loading) {
 		return <div>loading...</div>;
-	} else if (authors.length === 0) {
-		setAuthors(result.data.allAuthors);
 	}
 
 	const show = {

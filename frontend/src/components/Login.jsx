@@ -11,7 +11,7 @@ const Login = ({ token, setToken }) => {
 
 	useEffect(() => {
 		if (token) {
-			navigate("/authors");
+			navigate("/books");
 		}
 	}, [token, navigate]);
 
