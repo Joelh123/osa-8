@@ -3,6 +3,7 @@ import { ALL_BOOKS, CREATE_BOOK } from "../queries";
 import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { updateCache } from "../App";
 
 const NewBook = ({ token }) => {
 	const [title, setTitle] = useState("");
@@ -24,11 +25,7 @@ const NewBook = ({ token }) => {
 			console.log(error.graphQLErrors.map((e) => e.message).join("\n"));
 		},
 		update: (cache, response) => {
-			cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-				return {
-					allBooks: allBooks.concat(response.data.addBook),
-				};
-			});
+			updateCache(cache, { query: ALL_BOOKS }, response.data.addBook);
 		},
 	});
 
@@ -40,7 +37,7 @@ const NewBook = ({ token }) => {
 				title,
 				author,
 				published,
-				genres: genres.length > 0 ? genres : undefined,
+				genres: genres.length > 0 ? genres : null,
 			},
 		});
 

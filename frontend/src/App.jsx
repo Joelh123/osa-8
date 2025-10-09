@@ -6,7 +6,23 @@ import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useApolloClient, useSubscription } from "@apollo/client/react";
 import Recommendations from "./components/Recommendations";
-import { BOOK_ADDED } from "./queries";
+import { BOOK_ADDED, ALL_BOOKS } from "./queries";
+
+export const updateCache = (cache, query, addedBook) => {
+	const uniqByTitle = (a) => {
+		let seen = new Set();
+		return a.filter((item) => {
+			let k = item.title;
+			return seen.has(k) ? false : seen.add(k);
+		});
+	};
+
+	cache.updateQuery(query, ({ allBooks }) => {
+		return {
+			allBooks: uniqByTitle(allBooks.concat(addedBook)),
+		};
+	});
+};
 
 const App = () => {
 	const [token, setToken] = useState(() =>
@@ -14,13 +30,20 @@ const App = () => {
 	);
 	const client = useApolloClient();
 
+	console.log(client.cache.extract());
+
 	const navigate = useNavigate();
 
 	useSubscription(BOOK_ADDED, {
-		onData: ({ data }) => {
-			console.log(data);
+		onData: ({ data, client }) => {
 			const addedBook = data.data.bookAdded;
 			window.alert(`${addedBook.title} added`);
+
+			updateCache(
+				client.cache,
+				{ query: ALL_BOOKS, variables: { genre: null } },
+				addedBook
+			);
 		},
 	});
 
