@@ -21,6 +21,7 @@ require("dotenv").config();
 
 const typeDefs = require("./schema");
 const resolvers = require("./resolvers");
+const createBookCountLoader = require("./bookCountLoader");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -45,7 +46,17 @@ const start = async () => {
 	});
 
 	const schema = makeExecutableSchema({ typeDefs, resolvers });
-	const serverCleanup = useServer({ schema }, wsServer);
+	const serverCleanup = useServer(
+		{
+			schema,
+			context: async (context, message, args) => {
+				return {
+					bookCountLoader: createBookCountLoader(),
+				};
+			},
+		},
+		wsServer
+	);
 
 	const server = new ApolloServer({
 		schema: makeExecutableSchema({ typeDefs, resolvers }),
@@ -72,11 +83,12 @@ const start = async () => {
 		expressMiddleware(server, {
 			context: async ({ req }) => {
 				const auth = req ? req.headers.authorization : null;
+				let currentUser = null;
 				if (auth && auth.startsWith("Bearer ")) {
 					const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET);
-					const currentUser = await User.findById(decodedToken.id);
-					return { currentUser };
+					currentUser = await User.findById(decodedToken.id);
 				}
+				return { currentUser, bookCountLoader: createBookCountLoader() };
 			},
 		})
 	);

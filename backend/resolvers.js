@@ -17,15 +17,17 @@ const resolvers = {
 			return authors.length;
 		},
 		allBooks: async (root, args) => {
-			const books = await Book.find({});
+			const books = await Book.find({}).populate("author");
 			const author = await Author.findOne({ name: args.author });
 
 			let newBooks = author
 				? books.filter((b) => b.author.equals(author._id))
 				: books;
-			return args.genre
+
+			const result = args.genre
 				? newBooks.filter((b) => b.genres.includes(args.genre))
 				: newBooks;
+			return result;
 		},
 		allAuthors: async () => await Author.find({}),
 		me: (root, args, context) => {
@@ -77,7 +79,8 @@ const resolvers = {
 				});
 			}
 
-			pubsub.publish("BOOK_ADDED", { bookAdded: book });
+			const populatedBook = await Book.findById(book._id).populate("author");
+			pubsub.publish("BOOK_ADDED", { bookAdded: populatedBook });
 
 			return Book.findById(book._id).populate("author");
 		},
@@ -140,16 +143,8 @@ const resolvers = {
 		},
 	},
 	Author: {
-		bookCount: async (root) => {
-			const books = await Book.find({});
-			return books.filter((b) => (b.author._id.toString() !== root.id ? null : b))
-				.length;
-		},
-	},
-	Book: {
-		author: async (root) => {
-			const author = await Author.findOne({ _id: root.author._id.toString() });
-			return author;
+		bookCount: async (root, args, context) => {
+			return context.bookCountLoader.load(root._id);
 		},
 	},
 	Subscription: {

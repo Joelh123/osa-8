@@ -30,8 +30,6 @@ const App = () => {
 	);
 	const client = useApolloClient();
 
-	console.log(client.cache.extract());
-
 	const navigate = useNavigate();
 
 	useSubscription(BOOK_ADDED, {
